@@ -27,22 +27,39 @@
   fetch('photos.json')
     .then(res => res.json())
     .then(files => {
+      // Sort descending by filename
+      files.sort((a, b) => b.localeCompare(a));
+
       const container = document.getElementById('gallery');
-      files.forEach(file => {
-        const link = document.createElement('a');
-        link.href = 'photos/' + file;
-        link.setAttribute('data-lightbox', 'farm-gallery');
-        link.setAttribute('data-title', file);
+      files.forEach(entry => {
+  const wrapper = document.createElement('div');
+  wrapper.style.display = 'flex';
+  wrapper.style.flexDirection = 'column';
+  wrapper.style.alignItems = 'center';
 
-        const img = document.createElement('img');
-        img.src = 'photos/' + file;
-        img.alt = file;
+  const link = document.createElement('a');
+  link.href = 'photos/' + entry.file;
+  link.setAttribute('data-lightbox', 'farm-gallery');
+  link.setAttribute('data-title', entry.file);
 
-        link.appendChild(img);
-        container.appendChild(link);
-      });
+  const img = document.createElement('img');
+  img.src = 'photos/' + entry.file;
+  img.alt = entry.file;
+  img.style.marginBottom = '0.5rem';
+
+  const dateLabel = document.createElement('div');
+  const dt = new Date(entry.date);
+  dateLabel.textContent = dt.toLocaleDateString(); // shows like 5/19/2025
+  dateLabel.style.fontSize = '0.85rem';
+  dateLabel.style.color = '#555';
+
+  link.appendChild(img);
+  wrapper.appendChild(link);
+  wrapper.appendChild(dateLabel);
+  container.appendChild(wrapper);
+});
+
     });
 </script>
-
 </body>
 </html>
