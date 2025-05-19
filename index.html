@@ -4,106 +4,128 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Triple P Farm</title>
+  <link href="https://cdn.jsdelivr.net/npm/lightbox2@2/dist/css/lightbox.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/lightbox2@2/dist/js/lightbox.min.js"></script>
   <style>
-    body { font-family: sans-serif; background: #f0f0f0; margin: 0; padding: 0; text-align: center; }
-    h1 { margin: 1rem 0; }
+    body {
+      font-family: sans-serif;
+      background: #f0f0f0;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    h1 {
+      margin: 1rem 0;
+    }
+    .gallery h2 {
+      font-size: 1.5rem;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+    }
     .gallery {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1.5rem;
-  padding: 1rem;
-}
-
-    .gallery img {
-		  width: 100%;
-		  height: auto;
-		  max-width: 300px;
-		  object-fit: contain;
-		  border-radius: 8px;
-		  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-		}
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+    }
+    .month-section {
+      width: 100%;
+      max-width: 1200px;
+    }
+    .month-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .photo-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .photo-wrapper img {
+      max-width: 300px;
+      height: auto;
+      margin-bottom: 0.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    .photo-wrapper .date {
+      font-size: 0.85rem;
+      color: #555;
+    }
   </style>
- <link href="https://cdn.jsdelivr.net/npm/lightbox2@2/dist/css/lightbox.min.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/lightbox2@2/dist/js/lightbox.min.js"></script>
 </head>
 <body>
-	<img src="images/logo.png" alt="Triple P Farm" style="max-height: 100px; margin-top: 20px;">
+  <img src="images/logo.png" alt="Triple P Farm" style="max-height: 100px; margin-top: 20px;">
   <div class="gallery" id="gallery"></div>
-<script>
-  fetch('photos.json')
-    .then(res => res.json())
-    .then(files => {
-      // Sort descending by date
-      files.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-      // Group by Month/Year
-      const grouped = {};
-      files.forEach(entry => {
-        const dt = new Date(entry.date);
-        const groupKey = dt.toLocaleString('default', { month: 'long', year: 'numeric' });
-        if (!grouped[groupKey]) grouped[groupKey] = [];
-        grouped[groupKey].push(entry);
-      });
+  <script>
+    fetch('photos.json')
+      .then(res => res.json())
+      .then(files => {
+        // Sort descending by date
+        files.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-      const container = document.getElementById('gallery');
-      for (const group in grouped) {
-        const heading = document.createElement('h2');
-        heading.textContent = group;
-        heading.style.textAlign = 'center';
-        heading.style.marginTop = '2rem';
-        container.appendChild(heading);
-
-        const section = document.createElement('div');
-        section.style.display = 'flex';
-        section.style.flexWrap = 'wrap';
-        section.style.justifyContent = 'center';
-        section.style.gap = '1.5rem';
-        section.style.marginBottom = '2rem';
-
-        grouped[group].forEach(entry => {
-          const wrapper = document.createElement('div');
-          wrapper.style.display = 'flex';
-          wrapper.style.flexDirection = 'column';
-          wrapper.style.alignItems = 'center';
-
-          const link = document.createElement('a');
-          link.href = 'photos/' + entry.file;
-          link.setAttribute('data-lightbox', 'farm-gallery');
-          link.setAttribute('data-title', entry.file);
-
-          const img = document.createElement('img');
-          img.src = 'photos/' + entry.file;
-          img.alt = entry.file;
-          img.style.maxWidth = '300px';
-          img.style.height = 'auto';
-          img.style.marginBottom = '0.5rem';
-          img.style.borderRadius = '8px';
-          img.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
-
-          const dateLabel = document.createElement('div');
+        // Group by Month/Year
+        const grouped = {};
+        files.forEach(entry => {
           const dt = new Date(entry.date);
-          dateLabel.textContent = dt.toLocaleDateString(undefined, {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          });
-          dateLabel.style.fontSize = '0.85rem';
-          dateLabel.style.color = '#555';
-
-          link.appendChild(img);
-          wrapper.appendChild(link);
-          wrapper.appendChild(dateLabel);
-          section.appendChild(wrapper);
+          const groupKey = dt.toLocaleString('default', { month: 'long', year: 'numeric' });
+          if (!grouped[groupKey]) grouped[groupKey] = [];
+          grouped[groupKey].push(entry);
         });
 
-        container.appendChild(section);
-      }
-    });
-</script>
+        const container = document.getElementById('gallery');
 
+        for (const group in grouped) {
+          const groupSection = document.createElement('div');
+          groupSection.className = 'month-section';
 
+          const heading = document.createElement('h2');
+          heading.textContent = group;
+          groupSection.appendChild(heading);
+
+          const grid = document.createElement('div');
+          grid.className = 'month-grid';
+
+          grouped[group].forEach(entry => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'photo-wrapper';
+
+            const cleanPath = 'photos/' + entry.file.replaceAll('\\', '/');
+
+            const link = document.createElement('a');
+            link.href = cleanPath;
+            link.setAttribute('data-lightbox', 'farm-gallery');
+            link.setAttribute('data-title', entry.file);
+
+            const img = document.createElement('img');
+            img.src = cleanPath;
+            img.alt = entry.file;
+
+            const dateLabel = document.createElement('div');
+            const dt = new Date(entry.date);
+            dateLabel.className = 'date';
+            dateLabel.textContent = dt.toLocaleDateString(undefined, {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+
+            link.appendChild(img);
+            wrapper.appendChild(link);
+            wrapper.appendChild(dateLabel);
+            grid.appendChild(wrapper);
+          });
+
+          groupSection.appendChild(grid);
+          container.appendChild(groupSection);
+        }
+      });
+  </script>
 </body>
 </html>
