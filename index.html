@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Triple P Farm Gallery</title>
+  <title>Triple P Farm</title>
   <style>
     body { font-family: sans-serif; background: #f0f0f0; margin: 0; padding: 0; text-align: center; }
     h1 { margin: 1rem 0; }
@@ -17,25 +17,32 @@
 		  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 		}
   </style>
+ <link href="https://cdn.jsdelivr.net/npm/lightbox2@2/dist/css/lightbox.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/lightbox2@2/dist/js/lightbox.min.js"></script>
 </head>
 <body>
-	<img src="images/logo.png" alt="Triple P Farm Logo" style="max-height: 100px; margin-top: 20px;">
-
-  <h1>Triple P Farm Gallery</h1>
+	<img src="images/logo.png" alt="Triple P Farm" style="max-height: 100px; margin-top: 20px;">
   <div class="gallery" id="gallery"></div>
+<script>
+  fetch('photos.json')
+    .then(res => res.json())
+    .then(files => {
+      const container = document.getElementById('gallery');
+      files.forEach(file => {
+        const link = document.createElement('a');
+        link.href = 'photos/' + file;
+        link.setAttribute('data-lightbox', 'farm-gallery');
+        link.setAttribute('data-title', file);
 
-  <script>
-    fetch('photos.json')
-      .then(res => res.json())
-      .then(files => {
-        const container = document.getElementById('gallery');
-        files.forEach(file => {
-          const img = document.createElement('img');
-          img.src = 'photos/' + file;
-          img.alt = file;
-          container.appendChild(img);
-        });
+        const img = document.createElement('img');
+        img.src = 'photos/' + file;
+        img.alt = file;
+
+        link.appendChild(img);
+        container.appendChild(link);
       });
-  </script>
+    });
+</script>
+
 </body>
 </html>
