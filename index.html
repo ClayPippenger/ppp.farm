@@ -34,39 +34,69 @@
   fetch('photos.json')
     .then(res => res.json())
     .then(files => {
-      // Sort descending by filename
-      files.sort((a, b) => b.localeCompare(a));
+      // Sort by date descending
+      files.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      // Group by Month/Year
+      const grouped = {};
+      files.forEach(entry => {
+        const dt = new Date(entry.date);
+        const groupKey = dt.toLocaleString('default', { month: 'long', year: 'numeric' });
+        if (!grouped[groupKey]) grouped[groupKey] = [];
+        grouped[groupKey].push(entry);
+      });
 
       const container = document.getElementById('gallery');
-      files.forEach(entry => {
-  const wrapper = document.createElement('div');
-  wrapper.style.display = 'flex';
-  wrapper.style.flexDirection = 'column';
-  wrapper.style.alignItems = 'center';
+      for (const group in grouped) {
+        const heading = document.createElement('h2');
+        heading.textContent = group;
+        heading.style.textAlign = 'center';
+        heading.style.marginTop = '2rem';
+        container.appendChild(heading);
 
-  const link = document.createElement('a');
-  link.href = 'photos/' + entry.file;
-  link.setAttribute('data-lightbox', 'farm-gallery');
-  link.setAttribute('data-title', entry.file);
+        const section = document.createElement('div');
+        section.style.display = 'flex';
+        section.style.flexWrap = 'wrap';
+        section.style.justifyContent = 'center';
+        section.style.gap = '1.5rem';
+        section.style.marginBottom = '2rem';
 
-  const img = document.createElement('img');
-  img.src = 'photos/' + entry.file;
-  img.alt = entry.file;
-  img.style.marginBottom = '0.5rem';
+        grouped[group].forEach(entry => {
+          const wrapper = document.createElement('div');
+          wrapper.style.display = 'flex';
+          wrapper.style.flexDirection = 'column';
+          wrapper.style.alignItems = 'center';
 
-  const dateLabel = document.createElement('div');
-  const dt = new Date(entry.date);
-  dateLabel.textContent = dt.toLocaleDateString(); // shows like 5/19/2025
-  dateLabel.style.fontSize = '0.85rem';
-  dateLabel.style.color = '#555';
+          const link = document.createElement('a');
+          link.href = 'photos/' + entry.file;
+          link.setAttribute('data-lightbox', 'farm-gallery');
+          link.setAttribute('data-title', entry.file);
 
-  link.appendChild(img);
-  wrapper.appendChild(link);
-  wrapper.appendChild(dateLabel);
-  container.appendChild(wrapper);
-});
+          const img = document.createElement('img');
+          img.src = 'photos/' + entry.file;
+          img.alt = entry.file;
+          img.style.maxWidth = '300px';
+          img.style.height = 'auto';
+          img.style.marginBottom = '0.5rem';
+          img.style.borderRadius = '8px';
+          img.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
 
+          const dateLabel = document.createElement('div');
+          const dt = new Date(entry.date);
+          dateLabel.textContent = dt.toLocaleDateString();
+          dateLabel.style.fontSize = '0.85rem';
+          dateLabel.style.color = '#555';
+
+          link.appendChild(img);
+          wrapper.appendChild(link);
+          wrapper.appendChild(dateLabel);
+          section.appendChild(wrapper);
+        });
+
+        container.appendChild(section);
+      }
     });
 </script>
+
 </body>
 </html>
