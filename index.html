@@ -94,7 +94,8 @@
             const wrapper = document.createElement('div');
             wrapper.className = 'photo-wrapper';
 
-            const cleanPath = 'photos/' + entry.file.replaceAll('\\', '/');
+            const cleanPath = entry.file.replaceAll('\\', '/');
+
 
             const link = document.createElement('a');
             link.href = cleanPath;
