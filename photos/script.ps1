@@ -1,62 +1,69 @@
-# 3️⃣ Re-scan all images in folders and rebuild full photos.json
-Write-Host "`nRebuilding photos.json from all organized images..."
-$allFiles = Get-ChildItem -Recurse -File | Where-Object {
-    $_.Extension -match '\.jpe?g$' -and $_.FullName -notmatch 'script\.ps1'
+# Set root location
+$projectRoot = (Resolve-Path "..").Path
+
+# Get only .jpeg/.jpg files from root
+$incomingFiles = Get-ChildItem -Path . -File -Filter *.jp*g | Where-Object {
+    $_.DirectoryName -eq (Get-Location).Path -and $_.Name -notmatch '^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}'
 }
 
-$projectRoot = (Resolve-Path "..").Path
+# Strip EXIF but keep DateTimeOriginal
+Write-Host "Stripping EXIF metadata (except DateTimeOriginal)..."
+foreach ($file in $incomingFiles) {
+    & exiftool "-all=" "-tagsFromFile" '@' "-DateTimeOriginal" "-overwrite_original" $file.FullName | Out-Null
+}
+
+# Rename and move new photos
 $photos = @()
-$skipped = 0
+foreach ($file in $incomingFiles) {
+    $date = & exiftool -DateTimeOriginal -s3 "$($file.FullName)"
+    if (-not $date) {
+        $dateTaken = (Get-Item $file.FullName).LastWriteTime
+    } else {
+        $dateTaken = [datetime]::ParseExact($date, "yyyy:MM:dd HH:mm:ss", $null)
+    }
+
+    $timestamp = $dateTaken.ToString("yyyy-MM-dd_HH-mm-ss")
+    $year = $dateTaken.ToString("yyyy")
+    $month = $dateTaken.ToString("MM")
+    $ext = $file.Extension.ToLower()
+    $newName = "$timestamp$ext"
+    $targetFolder = ".\$year\$month"
+
+    if (!(Test-Path $targetFolder)) {
+        New-Item -ItemType Directory -Path $targetFolder | Out-Null
+    }
+
+    $targetPath = Join-Path $targetFolder $newName
+    if (-not (Test-Path $targetPath)) {
+        Move-Item -Path $file.FullName -Destination $targetPath
+        Write-Host "Moved: $($file.Name) → $targetPath"
+    }
+}
+
+# Rebuild photos.json
+Write-Host "`nRebuilding photos.json..."
+$allPhotos = @()
+$allFiles = Get-ChildItem -Recurse -File | Where-Object {
+    $_.Extension -match '\.jpe?g$'
+}
 
 foreach ($file in $allFiles) {
-    try {
-        $image = [System.Drawing.Image]::FromFile($file.FullName)
-
-        # Try to get DateTimeOriginal
-        $propItem = $null
-        try {
-            $propItem = $image.GetPropertyItem(36867)
-        } catch { }
-
-        if ($propItem) {
-            $dateString = [System.Text.Encoding]::ASCII.GetString($propItem.Value).Trim([char]0)
-            $dateTaken = [datetime]::ParseExact($dateString, "yyyy:MM:dd HH:mm:ss", $null)
-        } else {
-            # Fallback: use file date
-            $dateTaken = (Get-Item $file.FullName).LastWriteTime
-        }
-
-        $image.Dispose()
-
-        # Build relative path
-        $relativePath = $file.FullName.Substring($projectRoot.Length + 1).Replace('\', '/')
-
-        $photos += @{
-            file = $relativePath
-            date = $dateTaken.ToString("yyyy-MM-ddTHH:mm:ss")
-        }
+    $date = & exiftool -DateTimeOriginal -s3 "$($file.FullName)"
+    if (-not $date) {
+        $dateTaken = (Get-Item $file.FullName).LastWriteTime
+    } else {
+        $dateTaken = [datetime]::ParseExact($date, "yyyy:MM:dd HH:mm:ss", $null)
     }
-    catch {
-        Write-Warning "Failed to process $($file.FullName): $($_.Exception.Message)"
-        $skipped++
+
+    $relativePath = $file.FullName.Substring($projectRoot.Length + 1).Replace('\', '/')
+
+    $allPhotos += @{
+        file = $relativePath
+        date = $dateTaken.ToString("yyyy-MM-ddTHH:mm:ss")
     }
 }
 
-# Sort and write
-$sortedPhotos = $photos | Sort-Object -Property date -Descending
-Write-Host "`nFound $($sortedPhotos.Count) valid photos. Skipped $skipped."
-
-if ($sortedPhotos.Count -gt 0) {
-    $json = $sortedPhotos | ConvertTo-Json -Depth 3
-    $json | Out-File -Encoding utf8 "..\photos.json"
-    Write-Host "✅ photos.json created at: ..\photos.json"
-} else {
-    if ($sortedPhotos.Count -gt 0) {
-    $json = $sortedPhotos | ConvertTo-Json -Depth 3
-    $json | Out-File -Encoding utf8 "..\photos.json"
-    Write-Host "photos.json created at: ..\photos.json"
-} else {
-    Write-Warning "photos.json not created -- no valid photos found."
-}
-
-}
+$sorted = $allPhotos | Sort-Object -Property date -Descending
+$json = $sorted | ConvertTo-Json -Depth 3
+$json | Out-File -Encoding utf8 "..\photos.json"
+Write-Host "✅ photos.json updated: $($sorted.Count) photos."
