@@ -75,7 +75,9 @@ foreach ($file in $allFiles) {
 
         $image.Dispose()
 
-        $relativePath = $file.FullName.Substring((Get-Location).Path.Length + 1).Replace('\', '/')
+        $projectRoot = (Get-Item ".").FullName
+			  $relativePath = $file.FullName.Substring($projectRoot.Length + 1).Replace('\', '/')
+
 
         $photos += @{
             file = $relativePath
