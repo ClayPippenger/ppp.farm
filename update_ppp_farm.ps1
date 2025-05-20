@@ -34,7 +34,8 @@ if (Test-Path ".\script.ps1") {
 # 6️⃣ Done
 Write-Host "`n✅ Update complete. photos.json should now be ready in Y:\ppp.farm"
 Write-Host "`n✅ Will posh everything to Git now..."
-Pause
+
+#Pause
 
 Set-Location "Y:\ppp.farm\"
 
