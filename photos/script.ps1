@@ -1,6 +1,6 @@
 Add-Type -AssemblyName System.Drawing
 
-# 1️⃣ Strip EXIF (except DateTimeOriginal) for only root .jpg/.jpeg files
+# 1️⃣ Strip EXIF from new files in root
 Write-Host "Stripping EXIF metadata (except DateTimeOriginal)..."
 
 $incomingFiles = Get-ChildItem -Path . -File -Filter *.jp*g -Exclude *.json, *.ps1 | Where-Object {
@@ -11,8 +11,8 @@ foreach ($file in $incomingFiles) {
     & exiftool "-all=" "-tagsFromFile" '@' "-DateTimeOriginal" "-overwrite_original" $file.FullName
 }
 
-# 2️⃣ Rename and move to folders
-Write-Host "`nRenaming and organizing files into folders by year/month..."
+# 2️⃣ Rename and organize new files
+Write-Host "`nOrganizing photos by timestamp into folders..."
 
 $photos = @()
 
@@ -35,33 +35,28 @@ foreach ($file in $incomingFiles) {
         $year = $dateTaken.ToString("yyyy")
         $month = $dateTaken.ToString("MM")
         $newName = "$timestamp$($file.Extension.ToLower())"
-
         $targetFolder = ".\$year\$month"
+
         if (!(Test-Path $targetFolder)) {
             New-Item -ItemType Directory -Path $targetFolder | Out-Null
         }
 
         $targetPath = Join-Path $targetFolder $newName
 
-        if ($file.FullName -ne $targetPath -and -not (Test-Path $targetPath)) {
+        if (-not (Test-Path $targetPath)) {
             Move-Item -Path $file.FullName -Destination $targetPath
-            Write-Host "Moved $($file.Name) → $targetPath"
+            Write-Host "Moved: $($file.Name) → $targetPath"
         }
 
-        $relativePath = "$year/$month/$newName"
-
-        $photos += @{
-            file = $relativePath
-            date = $dateTaken.ToString("yyyy-MM-ddTHH:mm:ss")
-        }
     }
     catch {
         Write-Warning "Error processing $($file.Name). Skipping."
     }
 }
 
-# 3️⃣ Re-scan all organized subfolders to build complete photos.json
-$allFiles = Get-ChildItem -Path . -Recurse -File | Where-Object {
+# 3️⃣ Re-scan all images in folders and rebuild full photos.json
+Write-Host "`nRebuilding photos.json from all organized images..."
+$allFiles = Get-ChildItem -Recurse -File | Where-Object {
     $_.Extension -match '\.jpe?g$' -and $_.FullName -notmatch 'script\.ps1'
 }
 
@@ -92,9 +87,9 @@ foreach ($file in $allFiles) {
     }
 }
 
-# 4️⃣ Sort and write to JSON
+# 4️⃣ Write JSON file
 $sortedPhotos = $photos | Sort-Object -Property date -Descending
-Write-Host "`nFound $($sortedPhotos.Count) total photos in gallery."
+Write-Host "`nFound $($sortedPhotos.Count) total photos."
 
 if ($sortedPhotos.Count -gt 0) {
     $json = $sortedPhotos | ConvertTo-Json -Depth 3
