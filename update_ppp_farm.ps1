@@ -8,17 +8,16 @@
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 
 # 2️⃣ Remove Y: drive mapping if it exists
-#if (Test-Path -Path "Y:\") {
-#    Write-Host "Disconnecting existing Y: drive..."
-#    net use Y: /delete /y
-#    Start-Sleep -Seconds 2
-#}
+if (Test-Path -Path "Y:\") {
+    Write-Host "Disconnecting existing Y: drive..."
+    net use Y: /delete /y
+    Start-Sleep -Seconds 2
+}
 #
 # 3️⃣ Re-map Y: to shared network location
-#Write-Host "Mapping Y: to \\Blue1\Data\Shared..."
-#net use Y: "\\Blue1\Data\Shared" /persistent:no
-#Start-Sleep -Seconds 2
-#
+Write-Host "Mapping Y: to \\Blue1\Data\Shared..."
+net use Y: "\\Blue1\Data\Shared" /persistent:no
+Start-Sleep -Seconds 2
 
 # 4️⃣ Navigate to the photos folder
 Set-Location "Y:\ppp.farm\photos"
