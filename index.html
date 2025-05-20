@@ -78,76 +78,80 @@ footer a:hover {
   <img src="images/logo.png" alt="Triple P Farm" style="max-height: 100px; margin-top: 20px;">
   <div class="gallery" id="gallery"></div>
 
-  <script>
-    fetch('photos.json')
-    // Set footer year
-document.getElementById('year').textContent = new Date().getFullYear();
+<script>
+  fetch('photos.json')
+    .then(res => res.json())
+    .then(files => {
+      // Sort descending by date
+      files.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-      .then(res => res.json())
-      .then(files => {
-        // Sort descending by date
-        files.sort((a, b) => new Date(b.date) - new Date(a.date));
+      // Group by Month/Year
+      const grouped = {};
+      files.forEach(entry => {
+        const dt = new Date(entry.date);
+        const groupKey = dt.toLocaleString('default', { month: 'long', year: 'numeric' });
+        if (!grouped[groupKey]) grouped[groupKey] = [];
+        grouped[groupKey].push(entry);
+      });
 
-        // Group by Month/Year
-        const grouped = {};
-        files.forEach(entry => {
+      const container = document.getElementById('gallery');
+
+      for (const group in grouped) {
+        const groupSection = document.createElement('div');
+        groupSection.className = 'month-section';
+
+        const heading = document.createElement('h2');
+        heading.textContent = group;
+        groupSection.appendChild(heading);
+
+        const grid = document.createElement('div');
+        grid.className = 'month-grid';
+
+        grouped[group].forEach(entry => {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'photo-wrapper';
+
+          const cleanPath = entry.file.replaceAll('\\', '/');
+
+          const link = document.createElement('a');
+          link.href = cleanPath;
+          link.setAttribute('data-lightbox', 'farm-gallery');
+          link.setAttribute('data-title', entry.file);
+
+          const img = document.createElement('img');
+          img.src = cleanPath;
+          img.alt = entry.file;
+
+          const dateLabel = document.createElement('div');
           const dt = new Date(entry.date);
-          const groupKey = dt.toLocaleString('default', { month: 'long', year: 'numeric' });
-          if (!grouped[groupKey]) grouped[groupKey] = [];
-          grouped[groupKey].push(entry);
-        });
-
-        const container = document.getElementById('gallery');
-
-        for (const group in grouped) {
-          const groupSection = document.createElement('div');
-          groupSection.className = 'month-section';
-
-          const heading = document.createElement('h2');
-          heading.textContent = group;
-          groupSection.appendChild(heading);
-
-          const grid = document.createElement('div');
-          grid.className = 'month-grid';
-
-          grouped[group].forEach(entry => {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'photo-wrapper';
-
-            const cleanPath = entry.file.replaceAll('\\', '/');
-
-
-            const link = document.createElement('a');
-            link.href = cleanPath;
-            link.setAttribute('data-lightbox', 'farm-gallery');
-            link.setAttribute('data-title', entry.file);
-
-            const img = document.createElement('img');
-            img.src = cleanPath;
-            img.alt = entry.file;
-
-            const dateLabel = document.createElement('div');
-            const dt = new Date(entry.date);
-            dateLabel.className = 'date';
-            dateLabel.textContent = dt.toLocaleDateString(undefined, {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            });
-
-            link.appendChild(img);
-            wrapper.appendChild(link);
-            wrapper.appendChild(dateLabel);
-            grid.appendChild(wrapper);
+          dateLabel.className = 'date';
+          dateLabel.textContent = dt.toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
           });
 
-          groupSection.appendChild(grid);
-          container.appendChild(groupSection);
-        }
-      });
-  </script>
+          link.appendChild(img);
+          wrapper.appendChild(link);
+          wrapper.appendChild(dateLabel);
+          grid.appendChild(wrapper);
+        });
+
+        groupSection.appendChild(grid);
+        container.appendChild(groupSection);
+      }
+
+      // ✅ Set the footer year after everything is loaded
+      document.getElementById('year').textContent = new Date().getFullYear();
+    });
+</script>
+
+<footer>
+  <p>&copy; <span id="year"></span> Triple P Farm &mdash; <a href="mailto:friends@ppp.farm">friends@ppp.farm</a></p>
+</footer>
+
     <footer>
     <p>&copy; <span id="year"></span> Triple P Farm &mdash; <a href="mailto:friends@ppp.farm">friends@ppp.farm</a></p>
   </footer>
