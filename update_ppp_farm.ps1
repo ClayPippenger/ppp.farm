@@ -42,5 +42,14 @@ git add .
 git commit -m "Updates to stuff"
 git push origin main
 
+Set-Location "C:\"
+	
+# 2️⃣ Remove Y: drive mapping if it exists
+if (Test-Path -Path "Y:\") {
+    Write-Host "Disconnecting existing Y: drive..."
+    net use Y: /delete /y
+    Start-Sleep -Seconds 2
+}
+	
 #
 Pause
