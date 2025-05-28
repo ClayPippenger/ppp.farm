@@ -22,6 +22,14 @@ Start-Sleep -Seconds 2
 # 4️⃣ Navigate to the photos folder
 Set-Location "Y:\ppp.farm\photos"
 
+# 4.5⃣ De-duplicate
+Write-Host "Running Photo Deduplicater..."
+if (Test-Path "..\Remove-DuplicatImages.ps1") {
+    ..\Remove-DuplicatImages.ps1
+} else {
+    Write-Warning "Remove-DuplicatImages.ps1 not found in Y:\ppp.farm\"
+}
+
 # 5️⃣ Run the photo EXIF script (assumes it exists as script.ps1 in the same folder)
 Write-Host "Running EXIF photo sorter..."
 if (Test-Path ".\script.ps1") {
