@@ -182,8 +182,17 @@ footer a:hover {
         container.appendChild(groupSection);
       }
 
-      // ✅ Set the footer year after everything is loaded
+      // ✅ Set the footer year
       document.getElementById('year').textContent = new Date().getFullYear();
+
+      // ✅ Scroll restoration after dynamic content is rendered
+      const scrollPos = localStorage.getItem('scrollPos');
+      if (scrollPos !== null) {
+        // Delay slightly to ensure DOM layout is complete
+        setTimeout(() => {
+          window.scrollTo(0, parseInt(scrollPos));
+        }, 100);
+      }
     });
 </script>
 
