@@ -85,6 +85,20 @@ footer a:hover {
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 </head>
+<script>
+  // Save scroll position before unload
+  window.addEventListener('beforeunload', () => {
+    localStorage.setItem('scrollPos', window.scrollY);
+  });
+
+  // Restore scroll position on load
+  window.addEventListener('load', () => {
+    const scrollPos = localStorage.getItem('scrollPos');
+    if (scrollPos !== null) {
+      window.scrollTo(0, parseInt(scrollPos));
+    }
+  });
+</script>
 <body>
   <img src="images/logo.png" alt="Triple P Farm" style="max-height: 200px; margin-top: 20px;">
   <div class="gallery" id="gallery"></div>
@@ -162,6 +176,21 @@ footer a:hover {
 <footer>
   <p>&copy; <span id="year"></span>, Triple P Farm &mdash; <a href="mailto:friends@ppp.farm">friends@ppp.farm</a></p>
 </footer>
+
+<script>
+  // Save scroll position before unload
+  window.addEventListener('beforeunload', () => {
+    localStorage.setItem('scrollPos', window.scrollY);
+  });
+
+  // Restore scroll position on load
+  window.addEventListener('load', () => {
+    const scrollPos = localStorage.getItem('scrollPos');
+    if (scrollPos !== null) {
+      window.scrollTo(0, parseInt(scrollPos));
+    }
+  });
+</script>
 
 </body>
 </html>
