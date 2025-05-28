@@ -91,14 +91,28 @@ footer a:hover {
     localStorage.setItem('scrollPos', window.scrollY);
   });
 
-  // Restore scroll position on load
+  // Restore scroll position after DOM and images are ready
   window.addEventListener('load', () => {
     const scrollPos = localStorage.getItem('scrollPos');
     if (scrollPos !== null) {
-      window.scrollTo(0, parseInt(scrollPos));
+      const allImages = Array.from(document.images);
+      if (allImages.every(img => img.complete)) {
+        window.scrollTo(0, parseInt(scrollPos));
+      } else {
+        let loadedCount = 0;
+        allImages.forEach(img => {
+          img.addEventListener('load', () => {
+            loadedCount++;
+            if (loadedCount === allImages.length) {
+              window.scrollTo(0, parseInt(scrollPos));
+            }
+          });
+        });
+      }
     }
   });
 </script>
+
 <body>
   <img src="images/logo.png" alt="Triple P Farm" style="max-height: 200px; margin-top: 20px;">
   <div class="gallery" id="gallery"></div>
