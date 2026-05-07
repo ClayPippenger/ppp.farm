@@ -67,3 +67,4 @@ $sorted = $allPhotos | Sort-Object -Property date -Descending
 $json = $sorted | ConvertTo-Json -Depth 3
 $json | Out-File -Encoding utf8 "..\photos.json"
 Write-Host "✅ photos.json updated: $($sorted.Count) photos."
+pause

@@ -30,4 +30,4 @@ foreach ($ext in $imageExtensions) {
 }
 
 Write-Host "Deduplication complete." -ForegroundColor Green
-#Pause
+Pause
