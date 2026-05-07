@@ -1,0 +1,1 @@
+powershell -ExecutionPolicy Bypass -File update_ppp_farm.ps1
