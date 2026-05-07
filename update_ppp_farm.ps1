@@ -4,6 +4,8 @@
 # Go to the X:\Codex\ppp.farm using Powershell
 #
 
+git config --global user.email "41549061+ClayPippenger@users.noreply.github.com"
+
 # 1️⃣ Temporarily allow scripts for this session
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 
